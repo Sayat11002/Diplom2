@@ -52,9 +52,9 @@ if st.session_state.car_data is not None:
     st.session_state.car_data.setdefault("volume", 2.0)
 
 DATASET_PATH = {
-    "ru": r"C:\Users\Саят\Downloads\Cars_Dataset3.csv",
-    "kk": r"C:\Users\Саят\Downloads\cars_dataset_kk.csv",
-    "en": r"C:\Users\Саят\Downloads\Cars_dataset_en.csv",
+    "ru": "Cars_Dataset3.csv",
+    "kk": "cars_dataset_kk.csv",
+    "en": "Cars_dataset_en.csv",
 }
 
 PAGE_KEYS = ["nav_rec", "nav_price", "nav_tco"]
