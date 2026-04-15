@@ -46,7 +46,7 @@ def train_model(_df_model: pd.DataFrame):
 def show_price_prediction():
     st.title(t("price_title"))
 
-    dataset_path = st.session_state.get("dataset_path", r"C:\Users\Саят\Downloads\Cars_Dataset3.csv")
+    dataset_path = st.session_state.get("dataset_path", "Cars_Dataset3.csv")
     raw_data = load_data(dataset_path)
     df_model, encoders = preprocess_model_data(raw_data)
     model = train_model(df_model)
