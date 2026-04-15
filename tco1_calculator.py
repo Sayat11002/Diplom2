@@ -17,7 +17,7 @@ TAX_TABLE = [
 
 
 def calc_transport_tax(volume_cc: int, fuel_type_en: str) -> int:
-    """Транспортный налог. fuel_type_en — нормализованное значение ('electric'/'электро'/'Электро')."""
+    
     if fuel_type_en.lower() in ("electric", "электро"):
         return 0
     base_mrp = 1
@@ -71,10 +71,6 @@ CASCO_PROVIDERS = {
 
 
 def calc_ogpo(region: str, age: int, experience: int, vehicle_age: int, car_type_label: str) -> int:
-    """
-    car_type_label — первый элемент из tl("tco_car_type_options") означает легковой.
-    Определяем коэффициент по позиции в списке.
-    """
     regions = td("tco_regions")
     k_region, _ = regions.get(region, (1.0, 5_800))
     k_driver  = 1.0 if (age >= 25 and experience >= 2) else 1.5
@@ -253,7 +249,6 @@ def show_tco_calculator():
         col_c.metric(t("tco_total_pay"), f"{total_loan_pay:,.0f} ₸")
         st.divider()
 
-    # Страхование
     st.subheader(t("tco_insurance"))
     st.markdown(t("tco_ogpo_title"))
 
