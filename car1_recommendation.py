@@ -6,9 +6,7 @@ from translations import t
 
 def show_car_recommendation():
     st.title(t("rec_title"))
-
-    OPENAI_API_KEY = "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"
-    client = OpenAI(api_key=OPENAI_API_KEY)
+    client = OpenAI(api_key=st.secrets["API_KEY"])
 
 
     def _set_car(rec: dict):
