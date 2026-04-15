@@ -31,7 +31,7 @@ def show_car_recommendation():
         df["Fuel Type"] = df["Fuel Type"].replace(["nan", "None", ""], "бензин")
         return df.reset_index(drop=True)
 
-    dataset_path = st.session_state.get("dataset_path", r"C:\Users\Саят\Downloads\Cars_Dataset3.csv")
+    dataset_path = st.session_state.get("dataset_path", "Cars_Dataset3.csv")
     load_data(dataset_path)
 
     if st.session_state.get("car_data"):
