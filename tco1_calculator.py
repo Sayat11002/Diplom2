@@ -79,7 +79,7 @@ def calc_ogpo(region: str, age: int, experience: int, vehicle_age: int, car_type
     k_region, _ = regions.get(region, (1.0, 5_800))
     k_driver  = 1.0 if (age >= 25 and experience >= 2) else 1.5
     k_vehicle = 1.1 if vehicle_age > 7 else 1.0
-    # Первый вариант в radio = легковой/кроссовер
+    
     car_type_options = tl("tco_car_type_options")
     k_type = 2.09 if car_type_label == car_type_options[0] else 2.50
     premium = BASE_PREMIUM * 1.01 * k_region * k_type * k_driver * k_vehicle
@@ -87,12 +87,9 @@ def calc_ogpo(region: str, age: int, experience: int, vehicle_age: int, car_type
 
 
 def is_electric(fuel_label: str) -> bool:
-    """Проверяем, является ли выбранное топливо электро (последний элемент списка)."""
     fuel_options = tl("tco_fuel_options")
     return fuel_label == fuel_options[-1]
 
-
-# ══════════════════════════════════════════════════════════════
 def show_tco_calculator():
     st.title(t("tco_title"))
     st.caption(t("tco_caption"))
@@ -110,7 +107,7 @@ def show_tco_calculator():
 
     st.divider()
 
-    # ── Параметры автомобиля 
+
     st.subheader(t("tco_params"))
 
     REGIONS           = td("tco_regions")
@@ -138,11 +135,11 @@ def show_tco_calculator():
     FUEL_OPTIONS = tl("tco_fuel_options")
 
     _fuel_map = {
-        # ru/kk значения
+     
         "бензин": 0, "дизель": 1, "гибрид": 2, "электро": 3,
-        # en значения
+        
         "gasoline": 0, "diesel": 1, "hybrid": 2, "electric": 3,
-        # capitalize варианты
+        
         "бензин": 0, "Бензин": 0, "Дизель": 1, "Гибрид": 2, "Электро": 3,
         "Gasoline": 0, "Diesel": 1, "Hybrid": 2, "Electric": 3,
     }
