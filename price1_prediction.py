@@ -12,6 +12,10 @@ def load_data(path: str):
     df = df[["Company", "Mark", "Price", "Volume", "Year", "Fuel Type",
              "Transmission", "Mileage", "Car_Type", "Region", "Link"]].copy()
     df["Fuel Type"] = df["Fuel Type"].replace(["nan", "None", ""], "бензин")
+    Q1=df['Price'].quantile(0.25)
+    Q3=df['Price'].quantile(0.75)
+    IQR=Q3-Q1
+    df=df[(df['Price']>=Q1-1.5*IQR)&(df['Price']<=Q3+1.5*IQR)]
     for col in ["Company", "Mark", "Fuel Type", "Transmission", "Car_Type"]:
         df[col] = df[col].astype(str).str.lower()
     return df.reset_index(drop=True)
@@ -36,7 +40,7 @@ def train_model(_df_model: pd.DataFrame):
     X = _df_model.drop("Price", axis=1)
     y = _df_model["Price"]
     model = RandomForestRegressor(
-        n_estimators=300, max_depth=12,
+        n_estimators=300, max_depth=15,
         random_state=42, n_jobs=-1
     )
     model.fit(X, y)
