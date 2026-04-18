@@ -3,7 +3,7 @@ import streamlit as st
 TEXTS = {
     "ru": {
         # App
-        "app_title": "Car Assistant Pro",#CONSIDER
+        "app_title": "Интеллектуальный помощник",
         "welcome": "Добро пожаловать :)",
         "all_modules": "Все инструменты для автовладельца в одном месте",
         "nav_title": "Навигация",
@@ -199,7 +199,7 @@ TEXTS = {
     # ══════════════════════════════════════════════════════════
     "kk": {
         # App
-        "app_title": "Car Assistant Pro",#CONSIDER
+        "app_title": "Интеллектуалды көмекші",
         "welcome": "Қош келдіңіз :)",
         "all_modules": "Көлік иесіне арналған барлық құралдар бір жерде",
         "nav_title": "Навигация",
@@ -394,7 +394,7 @@ TEXTS = {
     # ══════════════════════════════════════════════════════════
 "en": {
         # App
-        "app_title": "Car Assistant Pro",
+        "app_title": "Intelligent Assistant",
         "welcome": "Welcome :)",
         "all_modules": "Everything you need for your car in one place", 
         "nav_title": "Navigation",
