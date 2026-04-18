@@ -1,6 +1,6 @@
 import streamlit as st
 from car1_recommendation import show_car_recommendation
-from price1_prediction import show_price_prediction
+from price2_prediction import show_price_prediction
 from tco1_calculator import show_tco_calculator
 from translations import t, TEXTS
 
