@@ -1,0 +1,86 @@
+import requests
+from bs4 import BeautifulSoup
+import pandas as pd
+import random
+import time
+url1='https://kolesa.kz/cars/?auto-run%5Bto%5D=1000000'
+headers = {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36'
+}
+cars_data3=[]
+for page in range(1,101):
+    time.sleep(random.uniform(2,7))
+    url=f"{url1}&page={page}"
+    response = requests.get(url, headers=headers,timeout=15)
+    if response.status_code == 200:
+        print(f"Page {page} is accessible")
+        soup = BeautifulSoup(response.content,'html.parser')
+        car_cards = soup.find_all('div', class_='a-card__header')
+        for card in car_cards:
+            try:
+                title=card.find('a', class_='a-card__link').text.strip()
+                link12=card.find('a', class_='a-card__link')["href"]
+                price=card.find('span', class_='a-card__price').text.strip()
+                price=card.find('span', class_='a-card__price').text.strip()
+                price=price.replace('₸', '').replace('\xa0', '').strip()
+                desc=card.find_next('p', class_='a-card__description').text.strip()
+                desc_part=desc.split(', ')
+                region =soup.find('span',class_="a-card__param").text.strip()
+                if "с пробегом " in desc:
+                    if len(desc_part) > 0:
+                        year=desc_part[0].split(' ')[0]
+                    else:
+                        year=None
+                    if len(desc_part) > 1:
+                        car_type=desc_part[1].replace('Б/у ', '')
+                    else:
+                        car_type=None
+                    if len(desc_part) > 2:
+                        volume=desc_part[2].split(' ')[0]
+                    else:
+                        volume = None
+                    if len(desc_part)>3:
+                        fuel_type=desc_part[3]
+                    else:
+                        fuel_type=None
+                    if len(desc_part) > 4:
+                        transmission=desc_part[4]
+                    else:
+                        transmission=None
+                    if len(desc_part) > 5:
+                        mileage=desc_part[5]
+                    else:
+                        mileage=None
+                else:
+                     year = car_type = volume = fuel_type = transmission = mileage = None
+                names = title.split()
+                if len(names) >= 2:
+                    if names[0] == "Land" and names[1] == "Rover":
+                        brand = "Land Rover"
+                        mark = ' '.join(names[2:]) if len(names) > 2 else None
+                    else:
+                        brand = names[0] 
+                        mark = ' '.join(names[1:]) 
+                else:
+                    brand = names[0] if len(names) > 0 else None
+                    mark = None
+                mileage="".join(mileage.split()[:-1])
+                cars_data3.append({
+                    'Company': brand,
+                    "Mark": mark,
+                    'Price': price,
+                    'Volume': volume,
+                    'Year': year,
+                    'Fuel Type': fuel_type,
+                    'Transmission': transmission.replace("КПП ","") ,  
+                    'Mileage': mileage.replace("спробегом",""), 
+                    'Car_Type': car_type ,
+                    'City': region,
+                    "Link":"https://kolesa.kz"+link12
+                })
+            except AttributeError:
+                continue
+    else:
+        print("Not accessible")
+        break
+df3=pd.DataFrame(cars_data3)
