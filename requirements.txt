@@ -4,3 +4,4 @@ openai
 plotly
 scikit-learn
 xgboost
+supabase
