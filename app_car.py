@@ -104,7 +104,7 @@ def show_home_reviews():
     </style>
     """, unsafe_allow_html=True)
 
-    st.markdown(f'<div class="reviews-header">⭐ {t("reviews_title")}</div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="reviews-header">{t("reviews_title")}</div>', unsafe_allow_html=True)
     st.markdown('<div class="reviews-subline">Ваше мнение помогает нам становиться лучше</div>',
                 unsafe_allow_html=True)
 
