@@ -5,6 +5,7 @@ from tco1_calculator import show_tco_calculator
 from translations import t, TEXTS
 import os
 from datetime import datetime
+import pandas as pd
 st.set_page_config(page_title="Car Assistant Pro", layout="wide")
 
 
@@ -38,6 +39,7 @@ apply_global_styles()
 def show_home_reviews():
     st.divider()
     st.subheader(t("reviews_title"))
+    file_path="reviews.csv"
     rating=st.select_slider(
     "",
     options=[1,2,3,4,5],
@@ -45,43 +47,43 @@ def show_home_reviews():
     format_func=lambda x:"⭐"*x,
     key="home_rating")
 
-if rating:
-    review=st.text_area(
-        t("reviews_text"),
-        placeholder=t("reviews_placeholder"),
-        key="home_review"
-    )
-
-    if st.button(t("reviews_send"),type="primary",key="send_review"):
-
-        if review.strip():
-
-            new_review=pd.DataFrame([{
-                "date":datetime.now().strftime("%Y-%m-%d %H:%M"),
-                "rating":rating,
-                "review":review
-            }])
-
-            if os.path.exists(file_path):
-                old_reviews=pd.read_csv(file_path)
-                all_reviews=pd.concat([old_reviews,new_review],ignore_index=True)
+    if rating:
+        review=st.text_area(
+            t("reviews_text"),
+            placeholder=t("reviews_placeholder"),
+            key="home_review"
+        )
+    
+        if st.button(t("reviews_send"),type="primary",key="send_review"):
+    
+            if review.strip():
+    
+                new_review=pd.DataFrame([{
+                    "date":datetime.now().strftime("%Y-%m-%d %H:%M"),
+                    "rating":rating,
+                    "review":review
+                }])
+    
+                if os.path.exists(file_path):
+                    old_reviews=pd.read_csv(file_path)
+                    all_reviews=pd.concat([old_reviews,new_review],ignore_index=True)
+                else:
+                    all_reviews=new_review
+    
+                all_reviews.to_csv(file_path,index=False)
+    
+                st.success(t("reviews_success"))
+    
             else:
-                all_reviews=new_review
-
-            all_reviews.to_csv(file_path,index=False)
-
-            st.success(t("reviews_success"))
-
-        else:
-            st.warning(t("reviews_warning"))
-
-    if os.path.exists(file_path):
-        reviews=pd.read_csv(file_path)
-
-        with st.expander("📊 Посмотреть отзывы и рейтинги"):
-            avg_rating=reviews["rating"].mean()
-            st.metric("Средний рейтинг",f"{avg_rating:.1f} / 5")
-            st.dataframe(reviews,use_container_width=True,hide_index=True)
+                st.warning(t("reviews_warning"))
+    
+        if os.path.exists(file_path):
+            reviews=pd.read_csv(file_path)
+    
+            with st.expander("📊 Посмотреть отзывы и рейтинги"):
+                avg_rating=reviews["rating"].mean()
+                st.metric("Средний рейтинг",f"{avg_rating:.1f} / 5")
+                st.dataframe(reviews,use_container_width=True,hide_index=True)
 
 if "lang" not in st.session_state:
     st.session_state["lang"] = "ru"
