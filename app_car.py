@@ -3,14 +3,9 @@ from car1_recommendation import show_car_recommendation
 from price2_prediction import show_price_prediction
 from tco1_calculator import show_tco_calculator
 from translations import t, TEXTS
-from datetime import datetime
+from datetime import datetime,timedelta
 from supabase import create_client
 from datetime import datetime
-import pytz
-
-# Казахстан = UTC+5
-kz_tz = pytz.timezone("Asia/Almaty")
-date_str = datetime.now(kz_tz).strftime("%Y-%m-%d %H:%M")
 st.set_page_config(page_title="Car Assistant Pro", layout="wide")
 
 
@@ -144,7 +139,7 @@ def show_home_reviews():
 
     if st.button(t("reviews_send"), type="primary", key="send_review"):
         if review_text.strip():
-            date_str = datetime.now().strftime("%Y-%m-%d %H:%M")
+            date_str = (datetime.now() + timedelta(hours=5)).strftime("%Y-%m-%d %H:%M")
             ok = save_review(date_str, rating, review_text.strip())
             if ok:
                 st.success(t("reviews_success"))
