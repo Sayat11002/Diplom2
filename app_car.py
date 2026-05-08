@@ -16,7 +16,7 @@ def get_supabase():
     key = st.secrets["supabase"]["key"]
     return create_client(url, key)
 
-
+@st.cache_data(ttl=60)
 def load_reviews():
     try:
         db = get_supabase()
