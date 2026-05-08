@@ -9,168 +9,113 @@ import pandas as pd
 st.set_page_config(page_title="Car Assistant Pro", layout="wide")
 
 
-def apply_global_styles():
-    st.markdown("""
-    <style>
-    .stApp {
-        background-color: #F0F4F8;
-    }
-    div.stButton > button {
-        background-color: #243B53;
-        color: #FFFFFF;
-        border-radius: 6px;
-        border: none;
-        padding: 0.6rem 1.2rem;
-        font-weight: 400;
-    }
-    div.stButton > button:hover {
-        background-color: #334E68;
-        color: #FFFFFF;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-    section[data-testid="stSidebar"] {
-        background-color: #D9E2EC;
-    }
-    </style>
-    """, unsafe_allow_html=True)
-
-
-apply_global_styles()
 def show_home_reviews():
     st.divider()
-    file_path = "reviews.csv"
 
-    # ── CSS для карточек отзывов ──────────────────────────────────────────
     st.markdown("""
     <style>
-    .reviews-header {
-        font-size: 1.5rem;
-        font-weight: 700;
-        color: #1a2b3c;
-        margin-bottom: 4px;
-    }
-    .reviews-subline {
-        color: #627d98;
-        font-size: 0.92rem;
-        margin-bottom: 20px;
-    }
+    .reviews-header { font-size:1.5rem; font-weight:700; color:#1a2b3c; margin-bottom:4px; }
+    .reviews-subline { color:#627d98; font-size:0.92rem; margin-bottom:20px; }
     .review-card {
-        background: #ffffff;
-        border: 1px solid #e2eaf2;
-        border-radius: 14px;
-        padding: 18px 22px;
-        margin-bottom: 14px;
-        box-shadow: 0 2px 8px rgba(36,59,83,0.06);
-        transition: box-shadow 0.2s;
+        background:#ffffff; border:1px solid #e2eaf2; border-radius:14px;
+        padding:18px 22px; margin-bottom:14px;
+        box-shadow:0 2px 8px rgba(36,59,83,0.06);
     }
-    .review-card:hover {
-        box-shadow: 0 4px 18px rgba(36,59,83,0.13);
-    }
-    .review-top {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        margin-bottom: 8px;
-    }
-    .review-stars {
-        font-size: 1.15rem;
-        letter-spacing: 2px;
-    }
-    .review-date {
-        font-size: 0.78rem;
-        color: #9fb3c8;
-        font-family: monospace;
-    }
-    .review-text {
-        font-size: 0.97rem;
-        color: #334e68;
-        line-height: 1.6;
-    }
+    .review-card:hover { box-shadow:0 4px 18px rgba(36,59,83,0.13); }
+    .review-top { display:flex; justify-content:space-between; margin-bottom:8px; }
+    .review-stars { font-size:1.1rem; letter-spacing:2px; }
+    .review-date { font-size:0.78rem; color:#9fb3c8; font-family:monospace; }
+    .review-text { font-size:0.97rem; color:#334e68; line-height:1.6; }
     .avg-badge {
-        display: inline-block;
-        background: linear-gradient(135deg, #243B53, #334E68);
-        color: white;
-        border-radius: 30px;
-        padding: 6px 20px;
-        font-size: 1.05rem;
-        font-weight: 600;
-        margin-bottom: 18px;
-        letter-spacing: 0.5px;
+        display:inline-block;
+        background:linear-gradient(135deg,#243B53,#334E68);
+        color:white; border-radius:30px; padding:6px 20px;
+        font-size:1.05rem; font-weight:600; margin-bottom:18px;
     }
-    .no-reviews {
-        color: #9fb3c8;
-        font-style: italic;
-        text-align: center;
-        padding: 20px 0;
-    }
+    .no-reviews { color:#9fb3c8; font-style:italic; text-align:center; padding:20px 0; }
     .form-section {
-        background: #f0f4f8;
-        border-radius: 14px;
-        padding: 20px 24px;
-        margin-bottom: 24px;
-        border: 1px solid #d9e2ec;
+        background:#f0f4f8; border-radius:14px;
+        padding:20px 24px; margin-bottom:24px; border:1px solid #d9e2ec;
     }
+    /* Звёздочки */
+    .star-row { display:flex; gap:8px; margin-bottom:16px; }
+    .star {
+        font-size:2rem; cursor:pointer; color:#d9e2ec;
+        transition: color 0.15s, transform 0.1s;
+        user-select:none;
+    }
+    .star.active { color:#f5a623; }
+    .star:hover { transform: scale(1.2); }
+    .star-label { font-size:0.9rem; color:#627d98; margin-bottom:8px; }
     </style>
     """, unsafe_allow_html=True)
 
     st.markdown(f'<div class="reviews-header">⭐ {t("reviews_title")}</div>', unsafe_allow_html=True)
     st.markdown('<div class="reviews-subline">Ваше мнение помогает нам становиться лучше</div>', unsafe_allow_html=True)
 
-    # ── Форма отправки ────────────────────────────────────────────────────
-    with st.container():
-        st.markdown('<div class="form-section">', unsafe_allow_html=True)
+    # ── Инициализация рейтинга в session_state ──
+    if "star_rating" not in st.session_state:
+        st.session_state["star_rating"] = 5
 
-        rating = st.select_slider(
-            "Ваша оценка:",
-            options=[1, 2, 3, 4, 5],
-            value=5,
-            format_func=lambda x: "⭐" * x,
-            key="home_rating"
-        )
+    # ── 5 звёздочек через radio (скрытый label, красивый вид) ──
+    st.markdown('<div class="form-section">', unsafe_allow_html=True)
+    st.markdown('<div class="star-label">Ваша оценка:</div>', unsafe_allow_html=True)
 
-        review = st.text_area(
-            t("reviews_text"),
-            placeholder=t("reviews_placeholder"),
-            height=100,
-            key="home_review"
-        )
+    # Используем columns как 5 звёздочек
+    star_cols = st.columns(10)  # 10 колонок — звёзды в первых 5, остаток пустой
+    current = st.session_state["star_rating"]
 
-        if st.button(t("reviews_send"), type="primary", key="send_review"):
-            if review.strip():
-                new_review = pd.DataFrame([{
-                    "date": datetime.now().strftime("%Y-%m-%d %H:%M"),
-                    "rating": rating,
-                    "review": review
-                }])
-                if os.path.exists(file_path):
-                    old = pd.read_csv(file_path)
-                    all_reviews = pd.concat([old, new_review], ignore_index=True)
-                else:
-                    all_reviews = new_review
-                all_reviews.to_csv(file_path, index=False)
-                st.success(t("reviews_success"))
+    for i in range(1, 6):
+        with star_cols[i - 1]:
+            star_char = "⭐" if i <= current else "☆"
+            # Кнопка-звезда
+            if st.button(star_char, key=f"star_{i}", help=f"{i} звезд{'а' if i==1 else 'ы' if i<5 else ''}"):
+                st.session_state["star_rating"] = i
                 st.rerun()
+
+    # Показываем текущий выбор
+    rating = st.session_state["star_rating"]
+    st.caption(f"Выбрано: {'⭐' * rating} ({rating} из 5)")
+
+    review_text = st.text_area(
+        t("reviews_text"),
+        placeholder=t("reviews_placeholder"),
+        height=100,
+        key="home_review"
+    )
+
+    if st.button(t("reviews_send"), type="primary", key="send_review"):
+        if review_text.strip():
+            date_str = datetime.now().strftime("%Y-%m-%d %H:%M")
+            new_review = pd.DataFrame([{
+                "date": date_str,
+                "rating": rating,
+                "review": review_text.strip()
+            }])
+            if os.path.exists("reviews.csv"):
+                old = pd.read_csv("reviews.csv")
+                all_reviews = pd.concat([old, new_review], ignore_index=True)
             else:
-                st.warning(t("reviews_warning"))
+                all_reviews = new_review
+            all_reviews.to_csv("reviews.csv", index=False)
+            st.success(t("reviews_success"))
+            st.session_state["star_rating"] = 5  # сброс после отправки
+            st.rerun()
+        else:
+            st.warning(t("reviews_warning"))
 
-        st.markdown('</div>', unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
 
-    # ── Список отзывов ────────────────────────────────────────────────────
-    if os.path.exists(file_path):
-        reviews = pd.read_csv(file_path)
-
+    # ── Список отзывов ─────────────────────────────────────
+    if os.path.exists("reviews.csv"):
+        reviews = pd.read_csv("reviews.csv")
         if not reviews.empty:
             avg = reviews["rating"].mean()
-            count = len(reviews)
-
-            # Средний рейтинг + звёзды
             full_stars = int(round(avg))
             st.markdown(
-                f'<div class="avg-badge">{"⭐" * full_stars} {avg:.1f} / 5 &nbsp;·&nbsp; {count} отзывов</div>',
+                f'<div class="avg-badge">{"⭐" * full_stars} {avg:.1f} / 5 &nbsp;·&nbsp; {len(reviews)} отзывов</div>',
                 unsafe_allow_html=True
             )
-
-            # Карточки отзывов — последние сверху
             for _, row in reviews.iloc[::-1].iterrows():
                 stars = "⭐" * int(row["rating"])
                 date_str = str(row.get("date", ""))
