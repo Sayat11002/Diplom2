@@ -3,12 +3,75 @@ from car1_recommendation import show_car_recommendation
 from price2_prediction import show_price_prediction
 from tco1_calculator import show_tco_calculator
 from translations import t, TEXTS
-import os
 from datetime import datetime
-import pandas as pd
+from supabase import create_client
+
 st.set_page_config(page_title="Car Assistant Pro", layout="wide")
 
 
+# ====================== SUPABASE ======================
+@st.cache_resource
+def get_supabase():
+    url = st.secrets["supabase"]["url"]
+    key = st.secrets["supabase"]["key"]
+    return create_client(url, key)
+
+
+def load_reviews():
+    try:
+        db = get_supabase()
+        result = db.table("reviews").select("*").order("date", desc=True).execute()
+        return result.data  # список словарей [{"date":..., "rating":..., "review":...}]
+    except Exception as e:
+        st.error(f"Ошибка загрузки отзывов: {e}")
+        return []
+
+
+def save_review(date: str, rating: int, review: str) -> bool:
+    try:
+        db = get_supabase()
+        db.table("reviews").insert({
+            "date": date,
+            "rating": rating,
+            "review": review
+        }).execute()
+        return True
+    except Exception as e:
+        st.error(f"Ошибка сохранения: {e}")
+        return False
+
+
+# ====================== СТИЛИ ======================
+def apply_global_styles():
+    st.markdown("""
+    <style>
+    .stApp {
+        background-color: #F0F4F8;
+    }
+    div.stButton > button {
+        background-color: #243B53;
+        color: #FFFFFF;
+        border-radius: 6px;
+        border: none;
+        padding: 0.6rem 1.2rem;
+        font-weight: 400;
+    }
+    div.stButton > button:hover {
+        background-color: #334E68;
+        color: #FFFFFF;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    section[data-testid="stSidebar"] {
+        background-color: #D9E2EC;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
+
+apply_global_styles()
+
+
+# ====================== ОТЗЫВЫ ======================
 def show_home_reviews():
     st.divider()
 
@@ -37,43 +100,33 @@ def show_home_reviews():
         background:#f0f4f8; border-radius:14px;
         padding:20px 24px; margin-bottom:24px; border:1px solid #d9e2ec;
     }
-    /* Звёздочки */
-    .star-row { display:flex; gap:8px; margin-bottom:16px; }
-    .star {
-        font-size:2rem; cursor:pointer; color:#d9e2ec;
-        transition: color 0.15s, transform 0.1s;
-        user-select:none;
-    }
-    .star.active { color:#f5a623; }
-    .star:hover { transform: scale(1.2); }
     .star-label { font-size:0.9rem; color:#627d98; margin-bottom:8px; }
     </style>
     """, unsafe_allow_html=True)
 
     st.markdown(f'<div class="reviews-header">⭐ {t("reviews_title")}</div>', unsafe_allow_html=True)
-    st.markdown('<div class="reviews-subline">Ваше мнение помогает нам становиться лучше</div>', unsafe_allow_html=True)
+    st.markdown('<div class="reviews-subline">Ваше мнение помогает нам становиться лучше</div>',
+                unsafe_allow_html=True)
 
-    # ── Инициализация рейтинга в session_state ──
+    # ── Инициализация рейтинга ──
     if "star_rating" not in st.session_state:
         st.session_state["star_rating"] = 5
 
-    # ── 5 звёздочек через radio (скрытый label, красивый вид) ──
+    # ── Форма ──
     st.markdown('<div class="form-section">', unsafe_allow_html=True)
     st.markdown('<div class="star-label">Ваша оценка:</div>', unsafe_allow_html=True)
 
-    # Используем columns как 5 звёздочек
-    star_cols = st.columns(10)  # 10 колонок — звёзды в первых 5, остаток пустой
+    # 5 звёздочек-кнопок
+    star_cols = st.columns(10)
     current = st.session_state["star_rating"]
-
     for i in range(1, 6):
         with star_cols[i - 1]:
             star_char = "⭐" if i <= current else "☆"
-            # Кнопка-звезда
-            if st.button(star_char, key=f"star_{i}", help=f"{i} звезд{'а' if i==1 else 'ы' if i<5 else ''}"):
+            if st.button(star_char, key=f"star_{i}",
+                         help=f"{i} звезд{'а' if i == 1 else 'ы' if i < 5 else ''}"):
                 st.session_state["star_rating"] = i
                 st.rerun()
 
-    # Показываем текущий выбор
     rating = st.session_state["star_rating"]
     st.caption(f"Выбрано: {'⭐' * rating} ({rating} из 5)")
 
@@ -87,52 +140,46 @@ def show_home_reviews():
     if st.button(t("reviews_send"), type="primary", key="send_review"):
         if review_text.strip():
             date_str = datetime.now().strftime("%Y-%m-%d %H:%M")
-            new_review = pd.DataFrame([{
-                "date": date_str,
-                "rating": rating,
-                "review": review_text.strip()
-            }])
-            if os.path.exists("reviews.csv"):
-                old = pd.read_csv("reviews.csv")
-                all_reviews = pd.concat([old, new_review], ignore_index=True)
-            else:
-                all_reviews = new_review
-            all_reviews.to_csv("reviews.csv", index=False)
-            st.success(t("reviews_success"))
-            st.session_state["star_rating"] = 5  # сброс после отправки
-            st.rerun()
+            ok = save_review(date_str, rating, review_text.strip())
+            if ok:
+                st.success(t("reviews_success"))
+                st.session_state["star_rating"] = 5
+                st.rerun()
         else:
             st.warning(t("reviews_warning"))
 
     st.markdown('</div>', unsafe_allow_html=True)
 
-    # ── Список отзывов ─────────────────────────────────────
-    if os.path.exists("reviews.csv"):
-        reviews = pd.read_csv("reviews.csv")
-        if not reviews.empty:
-            avg = reviews["rating"].mean()
-            full_stars = int(round(avg))
-            st.markdown(
-                f'<div class="avg-badge">{"⭐" * full_stars} {avg:.1f} / 5 &nbsp;·&nbsp; {len(reviews)} отзывов</div>',
-                unsafe_allow_html=True
-            )
-            for _, row in reviews.iloc[::-1].iterrows():
-                stars = "⭐" * int(row["rating"])
-                date_str = str(row.get("date", ""))
-                text = str(row.get("review", ""))
-                st.markdown(f"""
-                <div class="review-card">
-                    <div class="review-top">
-                        <span class="review-stars">{stars}</span>
-                        <span class="review-date">{date_str}</span>
-                    </div>
-                    <div class="review-text">{text}</div>
+    # ── Список отзывов из Supabase ──
+    records = load_reviews()
+
+    if records:
+        ratings = [r["rating"] for r in records]
+        avg = sum(ratings) / len(ratings)
+        full_stars = int(round(avg))
+        st.markdown(
+            f'<div class="avg-badge">{"⭐" * full_stars} {avg:.1f} / 5 &nbsp;·&nbsp; {len(records)} отзывов</div>',
+            unsafe_allow_html=True
+        )
+        for row in records:  # уже отсортированы desc по date
+            stars = "⭐" * int(row.get("rating", 5))
+            date_str = str(row.get("date", ""))
+            text = str(row.get("review", ""))
+            st.markdown(f"""
+            <div class="review-card">
+                <div class="review-top">
+                    <span class="review-stars">{stars}</span>
+                    <span class="review-date">{date_str}</span>
                 </div>
-                """, unsafe_allow_html=True)
-        else:
-            st.markdown('<div class="no-reviews">Пока отзывов нет. Будьте первым!</div>', unsafe_allow_html=True)
+                <div class="review-text">{text}</div>
+            </div>
+            """, unsafe_allow_html=True)
     else:
-        st.markdown('<div class="no-reviews">Пока отзывов нет. Будьте первым!</div>', unsafe_allow_html=True)
+        st.markdown('<div class="no-reviews">Пока отзывов нет. Будьте первым!</div>',
+                    unsafe_allow_html=True)
+
+
+# ====================== SESSION STATE ======================
 if "lang" not in st.session_state:
     st.session_state["lang"] = "ru"
 
@@ -168,6 +215,7 @@ if "page_key" not in st.session_state:
     st.session_state["page_key"] = WELCOME_KEY
 
 
+# ====================== ЯЗЫК ======================
 selected_lang = st.sidebar.selectbox(
     "🌐 Язык / Тіл / Language",
     ["ru", "kk", "en"],
@@ -176,20 +224,18 @@ selected_lang = st.sidebar.selectbox(
     key="lang_selector"
 )
 
-
 if selected_lang != st.session_state["lang"]:
     st.session_state["lang"] = selected_lang
-    
     st.session_state.car_data = None
     st.session_state.predicted_price = None
     st.session_state.pop("pp_results", None)
     st.session_state.pop("ai_recommendations", None)
     st.rerun()
 
-
 st.session_state["dataset_path"] = DATASET_PATH[st.session_state["lang"]]
 
 
+# ====================== РОУТИНГ ======================
 if st.session_state["page_key"] == WELCOME_KEY:
     st.title(t("app_title"))
     st.markdown(f"### {t('all_modules')}")
@@ -214,7 +260,6 @@ else:
 
     st.sidebar.title(t("nav_title"))
 
-    
     page_labels = [t(k) for k in PAGE_KEYS]
     current_label = t(st.session_state["page_key"]) if st.session_state["page_key"] in PAGE_KEYS else page_labels[0]
 
@@ -227,11 +272,9 @@ else:
         index=page_labels.index(current_label),
     )
 
-    
     selected_key = PAGE_KEYS[page_labels.index(selection_label)]
     st.session_state["page_key"] = selected_key
 
-    
     if selected_key == "nav_rec":
         show_car_recommendation()
     elif selected_key == "nav_price":
