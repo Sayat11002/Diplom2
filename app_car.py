@@ -38,7 +38,6 @@ apply_global_styles()
 def show_home_reviews():
     st.divider()
     st.subheader(t("reviews_title"))
-    st.markdown(t("###rev_mark"))
     rating=st.select_slider(
     "",
     options=[1,2,3,4,5],
