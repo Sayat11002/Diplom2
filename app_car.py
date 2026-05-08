@@ -5,7 +5,12 @@ from tco1_calculator import show_tco_calculator
 from translations import t, TEXTS
 from datetime import datetime
 from supabase import create_client
+from datetime import datetime
+import pytz
 
+# Казахстан = UTC+5
+kz_tz = pytz.timezone("Asia/Almaty")
+date_str = datetime.now(kz_tz).strftime("%Y-%m-%d %H:%M")
 st.set_page_config(page_title="Car Assistant Pro", layout="wide")
 
 
