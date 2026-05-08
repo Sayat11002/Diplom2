@@ -11,6 +11,19 @@ TEXTS = {
         "back_home": "Вернуться на главную",
         "lang_label": "🌐 Тіл / Language / Язык",
 
+        
+        "reviews_title":"⭐ Оцените приложение",
+        "reviews_rate":"Поставьте оценку:",
+        "reviews_text":"Напишите отзыв:",
+        "reviews_placeholder":"Например: удобный интерфейс и хорошие рекомендации...",
+        "reviews_send":"Отправить отзыв",
+        "reviews_success":"Спасибо! Ваш отзыв сохранён.",
+        "reviews_warning":"Сначала напишите отзыв.",
+        "reviews_show":"📊 Посмотреть отзывы и рейтинги",
+        "reviews_avg":"Средний рейтинг",
+        "reviews_empty":"Пока отзывов нет.",
+
+        
         "nav_rec":   "Подбор авто",
         "nav_price": "Оценка стоимости",
         "nav_tco":   "Расходы на владение",
@@ -207,6 +220,18 @@ TEXTS = {
         "back_home": "Басты бетке оралу",
         "lang_label": "🌐 Тіл / Language / Язык",
 
+        "reviews_title":"⭐ Қосымшаны бағалаңыз",
+        "reviews_rate":"Баға беріңіз:",
+        "reviews_text":"Пікір жазыңыз:",
+        "reviews_placeholder":"Мысалы: интерфейс ыңғайлы және ұсыныстар жақсы...",
+        "reviews_send":"Пікір жіберу",
+        "reviews_success":"Рахмет! Пікіріңіз сақталды.",
+        "reviews_warning":"Алдымен пікір жазыңыз.",
+        "reviews_show":"📊 Пікірлер мен рейтингтерді көру",
+        "reviews_avg":"Орташа рейтинг",
+        "reviews_empty":"Әзірге пікірлер жоқ.",
+
+
         "nav_rec":   "Көлік таңдау",
         "nav_price": "Бағаны болжау",
         "nav_tco":   "Шығындар калькуляторы",
@@ -401,6 +426,17 @@ TEXTS = {
         "nav_select": "Select a tool:",
         "back_home": "Back to Home", 
         "lang_label": "🌐 Тіл / Language / Язык",
+
+        "reviews_title":"⭐ Rate the application",
+        "reviews_rate":"Choose a rating:",
+        "reviews_text":"Write a review:",
+        "reviews_placeholder":"For example: convenient interface and useful recommendations...",
+        "reviews_send":"Submit Review",
+        "reviews_success":"Thank you! Your review has been saved.",
+        "reviews_warning":"Please write a review first.",
+        "reviews_show":"📊 View reviews and ratings",
+        "reviews_avg":"Average Rating",
+        "reviews_empty":"No reviews yet.",
 
         # Navigation - simplified module names
         "nav_rec":   "Car Finder", 
